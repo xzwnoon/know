@@ -1,0 +1,161 @@
+# config/settings.yaml
+
+# Neo4j 图数据库连接配置
+# 如果你本地没有安装Neo4j，请参考README中的安装指南。
+# 默认端口通常是7687 (Bolt协议)
+neo4j:
+  uri: 'bolt://localhost:7687' # 根据你的Neo4j服务地址和协议修改
+  user: 'neo4j'             # 你的Neo4j用户名，默认为 'neo4j'
+  password: 'GHr17wA66RyrS-VICFGCifLQVswtUydL0PCXKTx25Z4' # <<< !!!请务必将 'your_neo4j_password' 替换为你真实的Neo4j密码!!! >>>
+
+# LLM (大型语言模型) 配置
+# 本项目使用LLM进行命名实体识别(NER)和关系抽取(RE)。
+# 你需要配置一个LLM服务提供商。
+# 'dummy' 提供商仅用于测试，不会实际调用外部服务。
+# 'openai' 需要有效的OpenAI API Key。
+llm:
+  provider: 'openai' # 可选值: 'dummy', 'openai', 'deepseek'
+  model_name: 'deepseek-chat'
+  api_key: 'sk-4f086de87ecf4737af147f8aaa961756'
+  base_url: https://api.deepseek.com/v1
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer sk-0bb6e4dae7ed44b58a8585b363c95dfb  # 直接使用API密钥值
+  temperature: 0.3  # 提高temperature以获得更多样化的输出
+  max_tokens: 4096  # 减少max_tokens以避免过长响应
+  request_timeout: 120 # LLM请求超时时间（秒）
+  log_level: "DEBUG"  # 增加日志级别
+  log_raw_responses: true  # 记录原始LLM响应
+
+# 文件路径配置
+# 这些路径是相对于项目根目录的。
+paths:
+  raw_pdfs_dir: "C:\\Users\\Xiang\\Desktop\\knowledge paper" # 存放原始PDF文件的目录。请确保此目录存在。
+  # processed_text_dir: "C:\Users\Xiang\Desktop\knowledge paper" # PDF解析后的文本数据目录 (本项目中不再强制保存，而是直接传递数据)
+  kg_data_dir: "C:\\Users\\Xiang\\Desktop\\knowledge paper" # 存放抽取出的实体、关系数据 (JSON) 的目录。也用于存放可视化输出。请确保此目录存在。
+
+# 文本分块配置
+chunking:
+  method: "pdf"    # 可选: "texttiling", "bert", "fixed", "pdf"
+  max_chunk_size: 2000  # 增大块大小以适应PDF文档
+  min_chunk_size: 500   # 增大最小块大小
+  overlap_size: 200     # 增大重叠大小
+  pdf_structure: true   # 启用PDF结构感知分块
+
+# Prompt 模板配置
+# 这些是发送给LLM的具体指令，用于指导NER和RE任务。
+# '{text_segment}' 和 '{identified_entities_json}' 是占位符，会在运行时被实际文本和实体数据填充。
+prompts:
+  ner_template: |
+    你是一个铝合金领域的专业知识抽取助手。你的任务是从以下提供的文本段落中识别出所有预定义的实体类型，并输出为指定的JSON格式。
+    特别注意：对于性能参数和热处理工艺，必须提取完整的数值和单位信息。
+
+    你需要识别的实体类型包括：
+    - 材料名称 (MaterialAlloy): 特定的铝合金牌号或分类（例如：AA6061, 7系铝合金, 铸造铝合金, 7075铝合金, Al-Li alloy）
+    - 材料成分 (AlloyComponent): 铝合金中的合金元素或杂质及其含量信息（例如：Mg, Si, Fe, Si 0.4-0.8%, Li 2.0 wt.%）
+    - 热处理工艺 (HeatTreatmentProcess): 用于改变材料性能的工艺过程及其参数（例如：固溶处理, 时效处理, T6热处理, 淬火, 退火, 固溶处理 500°C 2h, solution treatment at 530°C for 1h followed by artificial aging at 180°C for 8h）
+    - 研究对象 (ResearchSubject): 文献主要研究的材料、工艺或现象（例如：AA7075铝合金的时效行为, 晶界偏析, 晶粒尺寸, 析出相, 疲劳裂纹扩展速率, microstructure evolution）
+    - 研究方法 (ResearchMethod): 用于研究、测试或分析的方法（例如：扫描电子显微镜(SEM), 拉伸测试, X射线衍射(XRD), transmission electron microscopy (TEM)）
+    - 性能指标 (MechanicalProperty): 材料的力学、物理或化学性能及其具体数值（例如：抗拉强度 570 MPa, 屈服强度 500 MPa, 延伸率 10%, hardness HV 150）
+    - 微观组织特征 (MicrostructureFeature): 材料内部的微观结构描述（例如：晶粒尺寸, 第二相粒子, 位错密度, 晶界）
+    - 应用领域 (Application): 材料的应用场景（例如：航空航天, 汽车结构件）
+
+    提取规则：
+    1. 对于性能指标 (MechanicalProperty)，必须提取完整的数值和单位（如"570 MPa"而不是"570"）
+    2. 对于热处理工艺 (HeatTreatmentProcess)，必须提取完整的工艺参数（如"500°C 2h"而不是"固溶处理"）
+    3. 对于材料成分 (AlloyComponent)，必须提取完整的含量范围（如"Si 0.4-0.8%"而不是"Si"）
+
+    输出格式要求：
+    [
+      {
+        "text": "实体文本（必须包含完整数值和单位）",
+        "type": "实体类型",
+        "attributes": {
+          "value": "数值（如适用）",
+          "unit": "单位（如适用）",
+          "range": "范围（如适用）"
+        },
+        "source_text": "原始文本片段"
+      }
+    ]
+
+    示例：
+    - 输入文本："AA6061铝合金经过T6热处理后，抗拉强度达到310MPa"
+    - 正确输出：
+      [
+        {"text": "AA6061", "type": "MaterialAlloy", "attributes": {}, "source_text": "..."},
+        {"text": "T6热处理", "type": "HeatTreatmentProcess", "attributes": {}, "source_text": "..."},
+        {"text": "310MPa", "type": "MechanicalProperty", "attributes": {"value": "310", "unit": "MPa"}, "source_text": "..."}
+      ]
+
+    以下是需要处理的文本：
+    """
+    {text_segment}
+    """
+
+    请严格按照上述要求和格式输出JSON：
+  re_template: |
+    你是一个铝合金领域的专业知识抽取助手。你的任务是从以下提供的文本段落和其中已识别的实体中，识别并抽取实体之间的关系。
+    特别注意：对于热处理工艺与性能指标的关系，必须提取完整的工艺参数和性能数值。
+
+    以下是该段落中已识别的实体列表 (JSON格式):
+    
+    你需要识别的关系类型包括：
+    - HAS_COMPONENT (A包含B): MaterialAlloy -> AlloyComponent
+    - EXHIBITS_PROPERTY (A展现B性能): MaterialAlloy -> MechanicalProperty
+    - UNDERGOES_TREATMENT (A经历B处理): MaterialAlloy -> HeatTreatmentProcess
+    - INVESTIGATED_BY (A通过B研究): ResearchSubject/MaterialAlloy/HeatTreatmentProcess/MicrostructureFeature -> ResearchMethod
+    - HAS_MICROSTRUCTURE (A具有B特征): MaterialAlloy -> MicrostructureFeature
+    - HAS_APPLICATION (A应用于B): MaterialAlloy -> Application
+    - AFFECTS_PROPERTY (A影响B性能): HeatTreatmentProcess -> MechanicalProperty
+
+    提取规则：
+    1. 对于热处理工艺与性能指标的关系 (AFFECTS_PROPERTY)，必须包含完整的工艺参数和性能数值
+    2. 对于材料与性能的关系 (EXHIBITS_PROPERTY)，必须包含完整的性能数值和单位
+    3. 对于材料与热处理的关系 (UNDERGOES_TREATMENT)，必须包含完整的工艺参数
+
+    输出格式要求：
+    [
+      {
+        "subject": "主体实体文本",
+        "object": "客体实体文本",
+        "relation_type": "关系类型",
+        "attributes": {
+          "process_params": "工艺参数（如适用）",
+          "property_value": "性能数值（如适用）"
+        }
+      }
+    ]
+
+    示例：
+    - 输入文本："AA6061铝合金经过T6热处理后，抗拉强度达到310MPa"
+    - 正确输出：
+      [
+        {
+          "subject": "AA6061",
+          "object": "T6热处理",
+          "relation_type": "UNDERGOES_TREATMENT",
+          "attributes": {}
+        },
+        {
+          "subject": "AA6061", 
+          "object": "310MPa",
+          "relation_type": "EXHIBITS_PROPERTY",
+          "attributes": {}
+        },
+        {
+          "subject": "T6热处理",
+          "object": "310MPa",
+          "relation_type": "AFFECTS_PROPERTY",
+          "attributes": {
+            "process_params": "T6",
+            "property_value": "310MPa"
+          }
+        }
+      ]
+
+    以下是需要处理的文本段落：
+    """
+    {text_segment}
+    """
+    已识别实体列表（JSON）：

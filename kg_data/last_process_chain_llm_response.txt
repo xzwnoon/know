@@ -1,0 +1,44 @@
+{
+  "process_chain": [
+    {
+      "step_text": "Al0.7Mg0.95Si0.35Cu alloys",
+      "step_type": "composition",
+      "order": 1
+    },
+    {
+      "step_text": "single-stage aging behavior",
+      "step_type": "process",
+      "order": 2
+    },
+    {
+      "step_text": "micro-hardness test and conductivity",
+      "step_type": "performance/organization",
+      "order": 3
+    },
+    {
+      "step_text": "artificial aging for 170℃/12h",
+      "step_type": "process",
+      "order": 4
+    },
+    {
+      "step_text": "hardness and conductivity of the peak aged specimens are 130HV and 41.6 IACS%",
+      "step_type": "performance/organization",
+      "order": 5
+    },
+    {
+      "step_text": "intergranular corrosion resistance is poor owing to the intergranular corrosion depth by 0.75mm",
+      "step_type": "performance/organization",
+      "order": 6
+    },
+    {
+      "step_text": "Two-stage aging process is 170℃/4h+190℃/4h",
+      "step_type": "process",
+      "order": 7
+    },
+    {
+      "step_text": "125HV hardness, 42.7IACS% conductivity, and reducing the tendency of intergranular corrosion",
+      "step_type": "performance/organization",
+      "order": 8
+    }
+  ]
+}

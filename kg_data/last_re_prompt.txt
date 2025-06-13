@@ -1,0 +1,24 @@
+你是一个铝合金领域的专业知识抽取助手。你的任务是从以下提供的文本段落和其中已识别的实体中，识别并抽取实体之间的关系。
+
+以下是该段落中已识别的实体列表 (JSON格式):
+
+你需要识别的关系类型包括：
+- HAS_COMPONENT (A包含B): MaterialAlloy -> AlloyComponent
+- EXHIBITS_PROPERTY (A展现B性能): MaterialAlloy -> MechanicalProperty
+- UNDERGOES_TREATMENT (A经历B处理): MaterialAlloy -> HeatTreatmentProcess
+- INVESTIGATED_BY (A通过B研究): ResearchSubject/MaterialAlloy/HeatTreatmentProcess/MicrostructureFeature -> ResearchMethod
+- HAS_MICROSTRUCTURE (A具有B特征): MaterialAlloy -> MicrostructureFeature
+- HAS_APPLICATION (A应用于B): MaterialAlloy -> Application
+
+请仔细阅读文本和实体列表，找到符合以上定义的关系。对于每个关系，请输出一个关系对象，包含以下键：
+- "subject": 关系主体实体的原始文本内容 (必须是上面'identified_entities_json'中某个实体的"text"值)
+- "object": 关系客体实体的原始文本内容 (必须是上面'identified_entities_json'中某个实体的"text"值)
+- "relation_type": 关系类型（使用上述英文英文名称之一）
+- "attributes": 关系上的额外属性，例如性能的测试条件，工艺的具体参数描述等，JSON对象（可选，如果没有则为 {}）
+
+要求输出格式为JSON数组，每个元素是一个关系对象。只输出JSON，不要包含其他任何解释或 markdown 标记（如代码块）。
+以下是需要处理的文本段落：
+"""
+Abstract：Al-Mg-Si-Cu series alloys have high strength，but poor corrosion resistance，limiting their engineering application. The micro-hardness test and conductivity are used to characterize the single-stage aging behavior of Al0.7Mg0.95Si0.35Cu alloys. The influence of the secondary aging temperature on aging behavior and performance is investigated. The result show that the hardness and conductivity of the peak aged specimens，treated by artifi－ cial aging for 170℃/12h，are 130HV and 41.6 IACS%，and the intergranular corrosion resistance is poor owing to the intergranular corrosion depth by 0.75mm. Two-stage aging process is 170℃/4h+190℃/4h，obtaining 125HV hardness，42.7IACS% conductivity，and reducing the tendency of intergranular corrosion. Key words：Al-Mg-Si aluminum alloy；Mg/Si；equilibrium phase；aging characteristics
+"""
+已识别实体列表（JSON）：

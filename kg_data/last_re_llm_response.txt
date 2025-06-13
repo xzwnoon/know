@@ -1,0 +1,64 @@
+{
+  "identified_entities_json": [
+    {
+      "text": "Al-Mg-Si-Cu series alloys",
+      "type": "MaterialAlloy"
+    },
+    {
+      "text": "Al0.7Mg0.95Si0.35Cu",
+      "type": "MaterialAlloy"
+    },
+    {
+      "text": "high strength",
+      "type": "MechanicalProperty"
+    },
+    {
+      "text": "poor corrosion resistance",
+      "type": "MechanicalProperty"
+    },
+    {
+      "text": "micro-hardness test",
+      "type": "ResearchMethod"
+    },
+    {
+      "text": "conductivity",
+      "type": "ResearchMethod"
+    },
+    {
+      "text": "single-stage aging",
+      "type": "HeatTreatmentProcess"
+    },
+    {
+      "text": "secondary aging temperature",
+      "type": "HeatTreatmentProcess"
+    },
+    {
+      "text": "artifi－ cial aging for 170℃/12h",
+      "type": "HeatTreatmentProcess"
+    },
+    {
+      "text": "intergranular corrosion",
+      "type": "MicrostructureFeature"
+    },
+    {
+      "text": "Two-stage aging process is 170℃/4h+190℃/4h",
+      "type": "HeatTreatmentProcess"
+    },
+    {
+      "text": "Al-Mg-Si aluminum alloy",
+      "type": "MaterialAlloy"
+    },
+    {
+      "text": "Mg/Si",
+      "type": "AlloyComponent"
+    },
+    {
+      "text": "equilibrium phase",
+      "type": "MicrostructureFeature"
+    },
+    {
+      "text": "aging characteristics",
+      "type": "MechanicalProperty"
+    }
+  ]
+}
